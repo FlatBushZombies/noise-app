@@ -23,10 +23,17 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro"
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Noise App to use your camera for live stadium overlay during noise measurements."
+        }
+      ],
       [
         "expo-splash-screen",
         {
@@ -43,6 +50,19 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "11e85955-f25b-4883-97b1-cce93905fcf3"
+      }
+    },
+    "owner": "bigcat87",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/11e85955-f25b-4883-97b1-cce93905fcf3"
     }
   }
 }
