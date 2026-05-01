@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+﻿import { MaterialIcons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import {
   requestRecordingPermissionsAsync,
@@ -8,7 +8,7 @@ import {
   type RecordingOptions,
 } from "expo-audio";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Easing, Text, TouchableOpacity, View } from "react-native";
+import { Animated, Easing, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const recordingOptions: RecordingOptions = {
@@ -16,7 +16,7 @@ const recordingOptions: RecordingOptions = {
   android: {
     extension: ".m4a",
     sampleRate: 44100,
-    bitRate: 128000,
+    numberOfChannels: 1,
   },
   ios: {
     extension: ".caf",
@@ -172,75 +172,137 @@ export default function App() {
     noiseDb >= 90 ? "rgba(239,68,68,0.9)" : noiseDb >= 75 ? "rgba(249,115,22,0.9)" : "rgba(34,197,94,0.9)";
 
   return (
-    <SafeAreaView className="flex-1 bg-[#f8fafc]" edges={["top", "left", "right"]}>
+    <View className="flex-1 bg-[#0c1929]">
+      {/* Background Camera - Always visible when measuring */}
       {isMeasuring && cameraPermission?.granted ? (
-        <CameraView facing="back" className="absolute inset-0" />
+        <CameraView facing="back" style={StyleSheet.absoluteFill} />
       ) : (
-        <View className="absolute inset-0 bg-[#f8fafc]" />
+        <View className="absolute inset-0 bg-[#1e3a5f]" />
       )}
-      <View className="absolute inset-0 bg-white/55" />
-      <View className="absolute -top-20 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-100/80" />
-      <View className="absolute top-32 right-[-64] h-72 w-72 rounded-full bg-sky-100/70" />
 
-      <View className="flex-1 items-center justify-center px-6 pb-24">
-        <Text className="mb-2 text-xs font-bold uppercase tracking-[0.35rem] text-sky-700">Stadium Mode</Text>
-        <Text className="mb-7 text-3xl font-black text-slate-900">Crowd Meter Live</Text>
+      {/* Translucent overlay for better readability */}
+      <View className="absolute inset-0 bg-black/25" />
 
-        <View className="h-72 w-72 items-center justify-center rounded-full border border-white/80 bg-white/70 shadow-lg shadow-slate-300/60">
-          <View className="absolute h-64 w-64 rounded-full border-[12px] border-sky-200" />
-          <View
-            className="absolute h-64 w-64 rounded-full border-[12px]"
+      {/* Decorative translucent circles */}
+      <View className="absolute -top-20 left-1/2 -ml-48 h-96 w-96 rounded-full bg-cyan-500/15" />
+      <View className="absolute top-32 -right-16 h-72 w-72 rounded-full bg-sky-500/[0.12]" />
+
+      <SafeAreaView className="flex-1" edges={["top", "left", "right"]}>
+        <View className="flex-1 items-center justify-center px-6 pb-24">
+          <Text className="mb-2 text-xs font-bold uppercase tracking-[5px] text-sky-300/90">
+            Stadium Mode
+          </Text>
+          <Text
+            className="mb-7 text-3xl font-black text-white/95"
             style={{
-              borderColor: ringTint,
-              transform: [{ scale: ringScale }],
-            }}
-          />
-          <Animated.View
-            className="absolute h-64 w-64 items-center"
-            style={{
-              transform: [
-                {
-                  rotate: rotation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ["0deg", "360deg"],
-                  }),
-                },
-              ],
+              textShadowColor: "rgba(0, 0, 0, 0.3)",
+              textShadowOffset: { width: 0, height: 2 },
+              textShadowRadius: 4,
             }}
           >
-            <View className="h-4 w-4 rounded-full bg-sky-500" />
-          </Animated.View>
+            Crowd Meter Live
+          </Text>
 
-          <Text className="text-6xl font-black text-slate-900">{noiseDb}</Text>
-          <Text className="mt-1 text-sm font-semibold uppercase tracking-[0.2rem] text-slate-500">dB</Text>
-          <Text className="mt-2 text-sm font-semibold text-sky-700">{noiseLabel}</Text>
-        </View>
+          {/* Main Meter Circle - Translucent Glass Effect */}
+          <View className="h-72 w-72 overflow-hidden rounded-full border border-white/30 bg-white/10">
+            <View className="flex-1 items-center justify-center">
+              {/* Base ring */}
+              <View className="absolute h-64 w-64 rounded-full border-[12px] border-sky-300/30" />
 
-        <View className="mt-6 h-16 w-full max-w-[320px] flex-row items-end justify-between rounded-2xl border border-white/90 bg-white/70 px-3 py-2">
-          {recentDb.map((value, idx) => (
-            <View
-              key={`${idx}-${value}`}
-              className="w-2 rounded-full bg-sky-500/90"
-              style={{ height: Math.max(6, Math.round((value / 100) * 48)) }}
-            />
-          ))}
-        </View>
+              {/* Active ring */}
+              <Animated.View
+                className="absolute h-64 w-64 rounded-full border-[12px]"
+                style={{
+                  borderColor: ringTint,
+                  transform: [{ scale: ringScale }],
+                }}
+              />
 
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={isMeasuring ? stopMeasuring : startMeasuring}
-          className="mt-8 min-w-[230px] rounded-full border border-sky-200 bg-sky-500 px-8 py-4 shadow-md shadow-sky-200"
-        >
-          <View className="flex-row items-center justify-center">
-            <MaterialIcons name={isMeasuring ? "stop-circle" : "play-circle"} size={22} color="#ffffff" />
-            <Text className="ml-2 text-base font-extrabold text-white">
+              {/* Inner content */}
+              <View className="items-center justify-center">
+                <Text
+                  className="text-7xl font-black text-white"
+                  style={{
+                    textShadowColor: "rgba(0, 0, 0, 0.5)",
+                    textShadowOffset: { width: 0, height: 3 },
+                    textShadowRadius: 6,
+                  }}
+                >
+                  {noiseDb}
+                </Text>
+                <Text className="text-lg font-semibold text-sky-200/90">dB</Text>
+                <Text className="mt-1 text-sm font-bold uppercase tracking-widest text-sky-100/80">
+                  {noiseLabel}
+                </Text>
+              </View>
+
+              {/* Rotating indicator */}
+              <Animated.View
+                className="absolute h-60 w-60"
+                style={{
+                  transform: [
+                    {
+                      rotate: rotation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ["0deg", "360deg"],
+                      }),
+                    },
+                  ],
+                }}
+              >
+                <View className="absolute -top-1 left-1/2 -ml-2 h-4 w-4 rounded-full bg-sky-400/90" />
+              </Animated.View>
+            </View>
+          </View>
+
+          {/* Bar Graph with Translucent Background */}
+          <View className="mt-8 h-28 w-full overflow-hidden rounded-2xl border border-white/20 bg-white/10 px-2">
+            <View className="flex-1 flex-row items-end justify-around py-3">
+              {recentDb.map((db, idx) => {
+                const barHeight = Math.max(12, (db / 100) * 80);
+                const barColor =
+                  db >= 90 ? "bg-red-500/90" : db >= 75 ? "bg-orange-400/90" : "bg-emerald-400/90";
+
+                return (
+                  <View
+                    key={idx}
+                    className={`w-3 rounded-full ${barColor}`}
+                    style={{ height: barHeight }}
+                  />
+                );
+              })}
+            </View>
+          </View>
+
+          {/* Action Button with Translucent Style */}
+          <TouchableOpacity
+            onPress={isMeasuring ? stopMeasuring : startMeasuring}
+            activeOpacity={0.85}
+            className={`mt-8 flex-row items-center justify-center gap-3 rounded-full border px-10 py-4 ${
+              isMeasuring
+                ? "border-red-400/40 bg-red-500/30"
+                : "border-sky-400/40 bg-sky-500/30"
+            }`}
+            style={{
+              shadowColor: isMeasuring ? "#ef4444" : "#0ea5e9",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.4,
+              shadowRadius: 12,
+              elevation: 8,
+            }}
+          >
+            <MaterialIcons name={isMeasuring ? "stop" : "mic"} size={26} color="#ffffff" />
+            <Text className="text-xl font-bold uppercase tracking-widest text-white">
               {isMeasuring ? "Stop" : "Start"}
             </Text>
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        <Text className="mt-4 text-center text-sm text-slate-500">{statusText}</Text>
-      </View>
-    </SafeAreaView>
+          {/* Status Text with Translucent Background */}
+          <View className="mt-6 rounded-xl border border-white/15 bg-white/10 px-5 py-3">
+            <Text className="text-center text-sm leading-5 text-sky-100/85">{statusText}</Text>
+          </View>
+        </View>
+      </SafeAreaView>
+    </View>
   );
 }
